@@ -1,0 +1,47 @@
+{
+    "compilerOptions": {
+        "esModuleInterop": true,
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleResolution": "Node",
+        "strict": true,
+        "allowSyntheticDefaultImports": true,
+        "forceConsistentCasingInFileNames": true,
+        "outDir": "dist",
+        "paths": {
+            "@controllers/*": [
+                "./src/controllers/*"
+            ],
+            "@mail/*": [
+                "./src/mail/*"
+            ],
+            "@apis/*": [
+                "./src/apis/*"
+            ],
+            "@models/*": [
+                "./src/models/*"
+            ],
+            "@routes/*": [
+                "./src/routes/*"
+            ],
+            "@utils/*": [
+                "./src/utils/*"
+            ],
+            "@middleware/*": [
+                "./src/middleware/*"
+            ],
+            "@constants/*": [
+                "./src/constants/*"
+            ],
+            "@services/*": [
+                "./src/services/*"
+            ],
+            "@/*": [
+                "./src/*"
+            ],
+        }
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}
