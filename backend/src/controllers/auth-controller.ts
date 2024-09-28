@@ -39,7 +39,7 @@ export const registerController = catchErrors(async function (
 
     return setAuthCookies({ response, accessToken, refreshToken })
         .status(CREATED)
-        .json(user)
+        .json({ user })
 })
 export const loginController = catchErrors(async function (request, response) {
     const body = signinSchema.parse({
@@ -53,7 +53,6 @@ export const loginController = catchErrors(async function (request, response) {
         .status(OK)
         .json({
             message: "User logged in successfully",
-            user,
         })
 })
 export const logoutController = catchErrors(async function (request, response) {

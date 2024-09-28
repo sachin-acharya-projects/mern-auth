@@ -3,8 +3,15 @@ import {
     Response as ExpressResponse,
     NextFunction as ExpressNextFunction,
 } from "express-serve-static-core"
+import mongoose from "mongoose"
 
 declare global {
+    namespace Express {
+        interface Request {
+            userid: unknown
+            sessionid: unknown
+        }
+    }
     namespace Global {
         interface Request extends ExpressRequest {}
         interface Response extends ExpressResponse {}

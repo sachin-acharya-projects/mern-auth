@@ -7,7 +7,7 @@ export type RefreshTokenPayload = {
     sessionid: Document["_id"]
 }
 
-type AccessTokenPayload = {
+export type AccessTokenPayload = {
     sessionid: Document["_id"]
     userid: Document["_id"]
 }
