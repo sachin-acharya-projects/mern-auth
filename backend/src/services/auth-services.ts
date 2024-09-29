@@ -1,7 +1,7 @@
 import { SessionModel, UserModel, VerificationCodeModel } from "@models/models"
 
 import { Enums, Http, Settings } from "@constants/index"
-import { appAssert, DateUtils, TokenSign } from "@utils/index"
+import { appAssert, AppError, DateUtils, TokenSign } from "@utils/index"
 import { EmailTemplates, sendMail } from "@mail/index"
 
 export type CreateAccountParams = {
@@ -18,7 +18,7 @@ export async function createAccount({
     appAssert(
         !emailExist,
         Http.CONFLICT,
-        "User with this email already exists. Please log in or use a different email."
+        "User already exists. Please log in instead."
     )
 
     const user = await UserModel.create({ email, password })
@@ -188,47 +188,52 @@ export const verifyEmail = async (code: string) => {
 }
 
 export const sendPasswordResetEmail = async (email: string) => {
-    const user = await UserModel.findOne({ email })
-    appAssert(
-        user,
-        Http.NOT_FOUND,
-        "Email not found. Please check the email address and try again."
-    )
+    try {
+        const user = await UserModel.findOne({ email })
+        appAssert(
+            user,
+            Http.NOT_FOUND,
+            "Email not found. Please check the email address and try again."
+        )
 
-    const fiveMinAgo = DateUtils.xMinutesAgo(5)
-    const counts = await VerificationCodeModel.countDocuments({
-        userid: user._id,
-        type: Enums.VerificationCodeType.PASSWORD_RESET,
-        createdAt: {
-            $gt: fiveMinAgo,
-        },
-    })
+        const fiveMinAgo = DateUtils.xMinutesAgo(5)
+        const counts = await VerificationCodeModel.countDocuments({
+            userid: user._id,
+            type: Enums.VerificationCodeType.PASSWORD_RESET,
+            createdAt: {
+                $gt: fiveMinAgo,
+            },
+        })
 
-    let message = Http.getMessage(Http.TOO_MANY_REQUESTS)
-    appAssert(counts <= 1, Http.TOO_MANY_REQUESTS, message.message)
+        let message = Http.getMessage(Http.TOO_MANY_REQUESTS)
+        appAssert(counts <= 1, Http.TOO_MANY_REQUESTS, message.message)
 
-    const expiresAt = DateUtils.xHoursFromNow(1)
-    const verification_code = await VerificationCodeModel.create({
-        userid: user._id,
-        type: Enums.VerificationCodeType.PASSWORD_RESET,
-        expiresAt,
-    })
+        const expiresAt = DateUtils.xHoursFromNow(1)
+        const verification_code = await VerificationCodeModel.create({
+            userid: user._id,
+            type: Enums.VerificationCodeType.PASSWORD_RESET,
+            expiresAt,
+        })
 
-    const url = `${Settings.CLIENT_URL}/password/reset?code=${
-        verification_code._id
-    }&exp=${expiresAt.getTime()}`
+        const url = `${Settings.CLIENT_URL}/password/reset?code=${
+            verification_code._id
+        }&exp=${expiresAt.getTime()}`
 
-    const { data, error } = await sendMail({
-        to: user.email,
-        ...EmailTemplates.getPasswordResetTemplate(url),
-    })
+        const { data, error } = await sendMail({
+            to: user.email,
+            ...EmailTemplates.getPasswordResetTemplate(url),
+        })
 
-    message = Http.getMessage(Http.INTERNAL_SERVER_ERROR)
-    appAssert(data?.id, Http.INTERNAL_SERVER_ERROR, message.message)
-    if (error) console.error(error)
-    return {
-        url,
-        emailid: data.id,
+        message = Http.getMessage(Http.INTERNAL_SERVER_ERROR)
+        appAssert(data?.id, Http.INTERNAL_SERVER_ERROR, message.message)
+        if (error) console.error(error)
+        return {
+            url,
+            emailid: data.id,
+        }
+    } catch (error) {
+        console.error("Password Reset Error Occured", (error as any).message)
+        return {}
     }
 }
 

@@ -2,17 +2,18 @@ import { z } from "zod"
 
 export const emailSchema = z
     .string({
-        message: "`email` field is required.",
+        message: "Email address is required.",
     })
-    .min(1, "`email` field cannot be empty")
-    .max(255, "`email` cannot be more than 255 characters.")
-    .email("`email` format is invalid.")
+    .min(1, "Email address is required.")
+    .max(255, "Email address must not exceed 255 characters.")
+    .email("Email format is invalid.")
+
 export const passwordSchema = z
     .string({
-        message: "`password` field is required.",
+        message: "Password is required.",
     })
-    .min(6, "`password` should be minimum 6 characters long.")
-    .max(255, "`password` cannot be more than 255 characters.")
+    .min(6, "Password must be at least 6 characters long.")
+    .max(255, "Password must not exceed 255 characters.")
 
 export const signinSchema = z.object({
     email: emailSchema,
@@ -24,10 +25,10 @@ export const registerSchema = signinSchema
     .extend({
         confirm_password: z
             .string({
-                message: "`confirm_password` field is required.",
+                message: "Password confirmation is required.",
             })
-            .min(6)
-            .max(255),
+            .min(6, "Password confirmation must be at least 6 characters long.")
+            .max(255, "Password confirmation must not exceed 255 characters."),
     })
     .refine((data) => data.password === data.confirm_password, {
         message: "Passwords do not match.",
@@ -36,10 +37,10 @@ export const registerSchema = signinSchema
 
 export const VerificationCodeSchema = z
     .string({
-        message: "Verification Code is missing.",
+        message: "Verification Code is required.",
     })
-    .min(1, "Verification code cannot be empty.")
-    .max(24, "Verification code cannot exceed length of 24 characters.")
+    .min(1, "Verification code is required.")
+    .max(24, "Verification code must not exceed 24 characters.")
 
 export const resetPasswordSchema = z.object({
     password: passwordSchema,

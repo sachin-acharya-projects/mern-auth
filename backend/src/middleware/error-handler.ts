@@ -11,23 +11,24 @@ export const errorHandler: ErrorRequestHandler = (
     response,
     next
 ) => {
-    console.error(`METHOD: ${request.method}; PATH: ${request.path}; Message`)
+    console.error(
+        `METHOD: ${request.method}\nPATH: ${
+            request.path
+        }\nDate: ${new Date().toLocaleString()}\nMESSAGE:`
+    )
     if (request.path === Constants.REFRESH_PATH) clearAuthCookies(response)
 
     if (error instanceof ZodError) {
-        console.error(`${error.name} ${error.message}`)
+        console.error(`${error.name} ${error.message}\n`)
         handleZodError(response, error)
         return
     } else if (error instanceof AppError) {
-        console.error(
-            `Application Error\nStatusCode:\t ${error.status_code}\nMessage:\t ${error.message}`
-        )
+        console.error(`${error.message} (HTTP/${error.status_code})\n`)
         handleAppError(response, error)
         return
     } else if (error instanceof Error) {
-        console.error(`${error.name} ${error.message}`)
-    } else console.error(error)
-
+        console.error(`${error.name} ${error.message}\n`)
+    } else console.error(error, "\n")
     response.status(Http.INTERNAL_SERVER_ERROR).json(Http.getMessage(500))
     return
 }
